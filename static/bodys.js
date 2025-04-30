@@ -1,7 +1,7 @@
 const registration = `
 <body>
 
-    <form action="#" method="post" id="registration-form">
+    <form method="post" id="registration-form">
         <div class="container">
 
             <h1>Register</h1>
@@ -32,9 +32,6 @@ const registration = `
             <label for="password-1">Password</label>
             <input type="password" id="password-1" name="password">
 
-            <label for="password-2">Confirm Password</label>
-            <input type="password" id="password-2" name="confirm-password">
-
             <div class="error" id="error-message"></div>
 
             <button type="submit">Submit</button>
@@ -48,13 +45,13 @@ const registration = `
 const login = `
 <body>
 
-    <form action="#" method="post" id="Log-in-form">
+    <form action="#" method="post" id="log-in-form">
         <div class="container">
 
             <h1>Log-in</h1>
 
             <label for="email">E-mail or Nickname</label>
-            <input type="text" id="email" name="email">
+            <input type="text" id="email" name="username">
 
             <label for="password-1">Password</label>
             <input type="password" id="password-1" name="password">
@@ -68,4 +65,12 @@ const login = `
 </body>
 `
 
-export {registration, login}
+const home = `
+<body>
+
+ <h1> Home </h1>
+ 
+</body>
+`
+
+export { registration, login, home }
