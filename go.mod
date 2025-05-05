@@ -1,11 +1,9 @@
-module forum
+module real-time-forum
 
-go 1.23.0
-
-toolchain go1.23.8
+go 1.23.5
 
 require (
-	github.com/google/uuid v1.6.0
-	github.com/mattn/go-sqlite3 v1.14.28
-	golang.org/x/crypto v0.37.0
+	github.com/gorilla/websocket v1.5.0 // Add this line
+	github.com/mattn/go-sqlite3 v1.14.24
+	golang.org/x/crypto v0.32.0
 )
