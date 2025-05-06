@@ -43,12 +43,18 @@ func CreateTable() error {
 	CREATE TABLE IF NOT EXISTS reactions (
    		 id INTEGER PRIMARY KEY AUTOINCREMENT,
     	 user_id INTEGER NOT NULL,
-    	 content_type TEXT NOT NULL CHECK (content_type IN ('post', 'comment')) ,
+    	 content_type TEXT NOT NULL CHECK (content_type IN ('post', 'comment')),
      	 content_id INTEGER NOT NULL, 
     	 reaction_type TEXT NOT NULL ,
-    	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-		
-);
+    	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE	
+		);
+	CREATE TABLE IF NOT EXISTS messages (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			sender TEXT,
+			receiver TEXT,
+			text TEXT,
+			time TEXT
+		);
 `
 
 	_, err := DB.Exec(tables)

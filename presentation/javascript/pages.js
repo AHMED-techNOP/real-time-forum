@@ -1,12 +1,15 @@
 import { Dateformat } from "./utils.js"
 import { Listener } from "./service.js"
+import { Checkstuts, username } from "./check.js";
+import { showError } from "./errore.js";
 
 let socket;
 
 export const Homepage = (data) => {
     console.log("==== data ", data);
-    let title = document.querySelector("title")
-    let name = title.getAttribute("class")
+    // let title = document.querySelector("title")
+    // let name = title.getAttribute("class")
+    let name = username
     document.body.innerHTML = `
     <header class="header">
         <div class="logo">FORUM</div>
@@ -167,6 +170,12 @@ export const Homepage = (data) => {
 
                 contact.addEventListener("click", () => {
                     console.log(`Clicked on user: ${user.username}`);
+
+
+                   let chatData = getChats(username, user.username)
+
+                    console.log(chatData);
+                    
                     openChat(user.username);
                 });
                 
@@ -182,7 +191,7 @@ export const Homepage = (data) => {
     document.body.append(container);
 
     // Initialize WebSocket
-    const username = document.querySelector("title").getAttribute("class");
+    // const username = document.querySelector("title").getAttribute("class");
     socket = new WebSocket(`ws://localhost:8080/ws?username=${username}`);
 
     socket.onmessage = (event) => {
@@ -191,11 +200,28 @@ export const Homepage = (data) => {
     };
 };
 
+function getChats(sender, receiver) {
+
+    fetch("/getChats", {
+            method: 'POST',
+            body: JSON.stringify({sender: sender, receiver: receiver})
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                return data
+            })
+            .catch(error => {
+                console.log('Error:', error)
+            })
+}
+
+
 function openChat(receiver) {
     console.log(`Opening chat with: ${receiver}`);
 
     // Get the current user's username from the title element
-    const username = document.querySelector("title").getAttribute("class");
+    // const username = document.querySelector("title").getAttribute("class");
 
     // Sanitize the receiver's username for use in the id
     const sanitizedReceiver = receiver.replace(/\s+/g, "-"); // Replace spaces with hyphens
@@ -256,8 +282,8 @@ function openChat(receiver) {
         const message = input.value;
         if (message.trim()) {
             // Use the username variable to send the message
-            socket.send(JSON.stringify({ sender: username, receiver, content: message }));
-            displayMessage({ sender: username, content: message }, receiver);
+            socket.send(JSON.stringify({ sender: username, receiver: receiver, content: message }));
+            // displayMessage({ sender: username, content: message }, receiver);
             input.value = "";
         }
     });
@@ -270,10 +296,10 @@ function displayMessage(message, receiver) {
 
     if (chatMessages) {
         // Avoid appending the message twice for the sender
-        if (message.sender === username && message.receiver === username) {
-            console.log("Skipping duplicate message for the sender.");
-            return;
-        }
+        // if (message.sender === username && message.receiver === username) {
+        //     console.log("Skipping duplicate message for the sender.");
+        //     return;
+        // }
 
         const msg = document.createElement("div");
         msg.textContent = `${message.sender}: ${message.content}`;

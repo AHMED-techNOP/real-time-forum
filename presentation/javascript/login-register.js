@@ -1,6 +1,6 @@
+import { Checkemail, validateAge, validateGender, validateName, validatePassword, Checkstuts } from "./check.js"
 import { Regester } from "./pages.js"
 import { showError } from "./errore.js"
-import { Checkemail, validateAge, validateGender, validateName, validatePassword, Checkstuts } from "./check.js"
 console.log("=======>");
 
 document.addEventListener("DOMContentLoaded", Checkstuts)

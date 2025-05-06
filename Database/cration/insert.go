@@ -123,3 +123,18 @@ func UpdateTocken(tocken string) error {
 	}
 	return nil
 }
+
+
+func InsertMessages(sender string, receiver string, content string) error {
+	time := time.Now().Format("2006-01-02 15:04:05")
+
+	info, err := DB.Prepare("INSERT INTO messages (sender ,receiver ,text ,time) VALUES (?,?,?,?)")
+	if err != nil {
+		return err
+	}
+	_, err = info.Exec(sender, receiver, content, time)
+	if err != nil {
+		return err
+	}
+	return nil
+}

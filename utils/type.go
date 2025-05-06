@@ -47,3 +47,9 @@ type Reaction struct {
 	Content_id     string
 	Reactione_type string
 }
+
+
+type Msg struct {
+	Text string
+	Time string
+}

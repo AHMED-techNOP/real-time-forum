@@ -92,7 +92,7 @@ func GetPostes(str int, end int, userid int) ([]utils.Postes, error) {
 		post.Like, post.DisLike, post.Have = Liklength(sl, userid)
 		postes = append(postes, post)
 	}
-	
+
 	return postes, nil
 }
 
@@ -135,7 +135,6 @@ func GetCategories(category string, start int, userid int) ([]utils.Postes, int,
 	}
 
 	return postes, end, nil
-
 }
 
 func LenghtComent(postid int) (nbr int, err error) {
@@ -241,4 +240,29 @@ func Liklength(sl []utils.Reaction, userid int) (int, int, string) {
 		}
 	}
 	return like, dislike, reactin
+}
+
+func SelecChats(sender string, receiver string) ([]utils.Msg, error) {
+	var msgs []utils.Msg
+
+	quire := "SELECT text, time FROM messages WHERE sender = ? AND receiver = ?"
+	rows, err := DB.Query(quire, sender, receiver)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var msg utils.Msg
+		err := rows.Scan(&msg.Text, &msg.Time)
+		if err != nil {
+			return nil, err
+		}
+
+		msgs = append(msgs, msg)
+
+	}
+
+	return msgs, nil
 }

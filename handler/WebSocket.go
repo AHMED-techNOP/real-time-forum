@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	db "real-time-forum/Database/cration"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -56,6 +57,13 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 			break
 		}
+
+		err = db.InsertMessages(msg.Sender, msg.Receiver, msg.Content)
+		if err != nil {
+			fmt.Println("insert massages error:", err)
+			return
+		}
+
 		broadcast <- msg
 	}
 }

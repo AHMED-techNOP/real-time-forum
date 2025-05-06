@@ -63,10 +63,12 @@ export function validateCategories(cat) {
 //     return hasTwoLetters;
 // }
 
+export var username
+
 async function Checkstuts(event) {
 
 
-    fetch('/stuts', {
+    fetch('/statuts', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -79,9 +81,12 @@ async function Checkstuts(event) {
                 console.log(result.error);
                 handle()
             } else {
-            
+
                     let head = document.querySelector("title")
                     head.setAttribute("class", result.name)
+
+                username = result.name
+                console.log(username);
                 
                 HomeHandeler()
             }
