@@ -181,6 +181,16 @@ func SelectPostid(postid int) error {
 	return nil
 }
 
+func GetlastidChat(s string, r string) (int, error) {
+	id := 0
+	query := "SELECT id FROM messages WHERE sender = ? AND receiver = ? ORDER BY id DESC LIMIT 1"
+	err := DB.QueryRow(query, s, r).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
 func Getlastid(cat string) (int, error) {
 	id := 0
 	query := "SELECT id FROM postes ORDER BY id DESC LIMIT 1"
@@ -242,11 +252,11 @@ func Liklength(sl []utils.Reaction, userid int) (int, int, string) {
 	return like, dislike, reactin
 }
 
-func SelecChats(sender string, receiver string) ([]utils.Msg, error) {
+func SelecChats(sender string, receiver string, str int, end int) ([]utils.Msg, error) {
 	var msgs []utils.Msg
 
-	quire := "SELECT text, time FROM messages WHERE sender = ? AND receiver = ?"
-	rows, err := DB.Query(quire, sender, receiver)
+	quire := "SELECT sender, receiver, text, time FROM messages WHERE sender = ? AND receiver = ? AND id > ? AND id <= ? ORDER BY id DESC"
+	rows, err := DB.Query(quire, sender, receiver, end, str)
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +265,7 @@ func SelecChats(sender string, receiver string) ([]utils.Msg, error) {
 
 	for rows.Next() {
 		var msg utils.Msg
-		err := rows.Scan(&msg.Text, &msg.Time)
+		err := rows.Scan(&msg.Sender, &msg.Receiver, &msg.Text, &msg.Time)
 		if err != nil {
 			return nil, err
 		}

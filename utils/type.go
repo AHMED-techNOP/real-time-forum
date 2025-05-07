@@ -50,6 +50,8 @@ type Reaction struct {
 
 
 type Msg struct {
+	Sender string
+	Receiver string
 	Text string
 	Time string
 }

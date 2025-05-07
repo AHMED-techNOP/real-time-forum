@@ -168,15 +168,20 @@ export const Homepage = (data) => {
                     contact.append(onlineIndicator);
                 }
 
-                contact.addEventListener("click", () => {
+                contact.addEventListener("click", async () => {
                     console.log(`Clicked on user: ${user.username}`);
 
 
-                   let chatData = getChats(username, user.username)
-
-                    console.log(chatData);
-                    
+                   const chatData = await getChats(username, user.username)
+                   // openchat(receiver)
                     openChat(user.username);
+                   
+                   console.log(chatData);
+                   if (chatData) {
+                    chatData.forEach(el => {
+                        displayMessage(el.Sender, el.Text, el.Time, el.Sender === username ? el.Receiver : el.Render)
+                    })
+                   }
                 });
                 
                 contactList.append(contact);
@@ -196,24 +201,30 @@ export const Homepage = (data) => {
 
     socket.onmessage = (event) => {
         const message = JSON.parse(event.data);
-        displayMessage(message, message.sender === username ? message.receiver : message.sender);
+        console.log(message);
+        displayMessage(message.sender, message.content, message.Time, message.sender === username ? message.receiver : message.sender)
     };
 };
 
-function getChats(sender, receiver) {
-
-    fetch("/getChats", {
+async function getChats(sender, receiver) {
+    try {
+        const response = await fetch("/getChats", {
             method: 'POST',
-            body: JSON.stringify({sender: sender, receiver: receiver})
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                return data
-            })
-            .catch(error => {
-                console.log('Error:', error)
-            })
+            body: JSON.stringify({ sender: sender, receiver: receiver }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok')
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.log('Error:', error);
+    }
 }
 
 
@@ -262,7 +273,14 @@ function openChat(receiver) {
     chatWindow.style.zIndex = "1000";
     chatWindow.style.overflow = "hidden";
 
+    
     document.body.append(chatWindow);
+
+
+    let chat = document.getElementById(`chat-messages-${sanitizedReceiver}`)
+    chat.style.display = "flex"
+    chat.style.flexDirection = "column-reverse"
+
     console.log("Chat window appended to the DOM.");
 
     // Ensure the send button exists before attaching the event listener
@@ -289,8 +307,8 @@ function openChat(receiver) {
     });
 }
 
-function displayMessage(message, receiver) {
-    const username = document.querySelector("title").getAttribute("class"); // Get the current user's username
+function displayMessage(sender, content, time, receiver) {
+    // const username = document.querySelector("title").getAttribute("class"); // Get the current user's username
     const sanitizedReceiver = receiver.replace(/\s+/g, "-"); // Sanitize receiver username
     const chatMessages = document.querySelector(`#chat-messages-${sanitizedReceiver}`);
 
@@ -302,7 +320,26 @@ function displayMessage(message, receiver) {
         // }
 
         const msg = document.createElement("div");
-        msg.textContent = `${message.sender}: ${message.content}`;
+        const span = document.createElement("span");
+
+        msg.style.padding = "10px";
+        msg.style.margin = "8px 0";
+        msg.style.backgroundColor = "#f1f1f1";
+        msg.style.borderRadius = "6px";
+        msg.style.fontFamily = "Arial, sans-serif";
+        msg.style.fontSize = "14px";
+        msg.style.position = "relative";
+
+        span.style.color = "#888";
+        span.style.fontSize = "12px";
+        span.style.right = "10px";
+        span.style.position = "absolute";
+        span.style.bottom = "6px";
+
+
+        msg.textContent = `${sender}: ${content}`;
+        span.textContent = `${time}`
+        msg.append(span)
         chatMessages.append(msg);
     }
 }
