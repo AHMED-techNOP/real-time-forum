@@ -31,7 +31,7 @@ func main() {
 	router.HandleFunc("/reactione", handler.Reaction)
 	router.HandleFunc("/logout", handler.Logout)
 	router.HandleFunc("/categories", handler.Categore)
-	router.HandleFunc("/online-users", handler.OnlineUsers)
+	// router.HandleFunc("/online-users", handler.OnlineUsers)
 	router.HandleFunc("/ws", handler.WebSocketHandler) // Add WebSocket route
 
 	go handler.HandleMessages() // Start WebSocket message handler in a goroutine
