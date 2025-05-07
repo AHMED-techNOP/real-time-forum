@@ -1,4 +1,4 @@
-import { Homepage, MoreData } from "./pages.js"
+import { Homepage, MoreData, updateUserList } from "./pages.js"
 import { Checkstuts, validateCategories } from "./check.js"
 import { showError } from "./errore.js"
 import { pagenation, Dateformat, debounce } from "./utils.js"
@@ -422,6 +422,8 @@ function logoutHandel() {
         .catch(error => {
             console.log('Error:', error);
         });
+
+        updateUserList()
 }
 
 

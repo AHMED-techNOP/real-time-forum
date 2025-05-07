@@ -4,6 +4,7 @@ import { Checkstuts, username } from "./check.js";
 import { showError } from "./errore.js";
 
 let socket;
+let Users = []
 
 export const Homepage = (data) => {
     console.log("==== data ", data);
@@ -142,54 +143,6 @@ export const Homepage = (data) => {
     let contactList = document.createElement("div");
     contactList.setAttribute("id", "contact-list");
 
-    // Fetch online users and display them
-
-    fetch("/online-users")
-
-        .then((response) => response.json())
-        .then((users) => {
-            console.log("==== users", users);
-            
-            users.forEach((user) => {
-                let contact = document.createElement("div");
-                contact.setAttribute("class", "contact");
-                contact.textContent = user.username;
-
-                // Add green circle for online users
-                if (user.online) {
-                    let onlineIndicator = document.createElement("span");
-                    onlineIndicator.setAttribute("class", "online-indicator");
-                    onlineIndicator.style.backgroundColor = "green";
-                    onlineIndicator.style.borderRadius = "50%";
-                    onlineIndicator.style.width = "10px";
-                    onlineIndicator.style.height = "10px";
-                    onlineIndicator.style.display = "inline-block";
-                    onlineIndicator.style.marginLeft = "10px";
-                    contact.append(onlineIndicator);
-                }
-
-                contact.addEventListener("click", async () => {
-                    console.log(`Clicked on user: ${user.username}`);
-
-
-                   const chatData = await getChats(username, user.username)
-                   // openchat(receiver)
-                    openChat(user.username);
-                   
-                   console.log(chatData);
-                   if (chatData) {
-                    chatData.forEach(el => {
-                        displayMessage(el.Sender, el.Text, el.Time, el.Sender === username ? el.Receiver : el.Render)
-                    })
-                   }
-                });
-                
-                contactList.append(contact);
-            });
-        })
-        .catch((error) => {
-            console.error("Error fetching online users:", error);
-        });
 
     contacts.append(contactList);
     container.append(contacts);
@@ -200,11 +153,68 @@ export const Homepage = (data) => {
     socket = new WebSocket(`ws://localhost:8080/ws?username=${username}`);
 
     socket.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        console.log(message);
-        displayMessage(message.sender, message.content, message.Time, message.sender === username ? message.receiver : message.sender)
-    }
+        const data = JSON.parse(event.data);
+
+        // Check if the message is about online users
+        if (data.type === "online-users") {
+            Users = data.users; // Array of users with their online status
+            console.log("==== users ", Users);
+
+            
+            updateUserList()
+
+        } else {
+            // Handle other message types (e.g., chat messages)
+            const message = data;
+            displayMessage(message.sender, message.content, message.Time, message.sender === username ? message.receiver : message.sender)
+        }
+    };
 }
+
+
+export function updateUserList() {
+    const contactList = document.getElementById("contact-list");
+    contactList.innerHTML = ""; // Clear the existing list
+        console.log("==== users ", Users);
+
+    Users.forEach((user) => {
+        let contact = document.createElement("div");
+        contact.setAttribute("class", "contact");
+        contact.textContent = user.username;
+
+        // Add green circle for online users
+        if (user.online) {
+            let onlineIndicator = document.createElement("span");
+            onlineIndicator.setAttribute("class", "online-indicator");
+            onlineIndicator.style.backgroundColor = "green";
+            onlineIndicator.style.borderRadius = "50%";
+            onlineIndicator.style.width = "10px";
+            onlineIndicator.style.height = "10px";
+            onlineIndicator.style.display = "inline-block";
+            onlineIndicator.style.marginLeft = "10px";
+            contact.append(onlineIndicator);
+        }
+
+        contact.addEventListener("click", async () => {
+            console.log(`Clicked on user: ${user.username}`);
+
+
+           const chatData = await getChats(username, user.username)
+           // openchat(receiver)
+            openChat(user.username);
+           
+           console.log(chatData);
+           if (chatData) {
+            chatData.forEach(el => {
+                displayMessage(el.Sender, el.Text, el.Time, el.Sender === username ? el.Receiver : el.Render)
+            })
+           }
+        })
+
+        contactList.append(contact);
+    });
+}
+
 
 async function getChats(sender, receiver) {
     try {
@@ -249,7 +259,10 @@ function openChat(receiver) {
     chatWindow.setAttribute("id", `chat-window-${sanitizedReceiver}`);
     chatWindow.setAttribute("class", "chat-window");
     chatWindow.innerHTML = `
-        <h3>Chat with ${receiver}</h3>
+       <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Chat with ${receiver}</h3>
+            <button id="close-chat-${sanitizedReceiver}" style="background: none; border: none; cursor: pointer; font-size: 16px;">X</button>
+        </div>
         <div class="chat-messages" id="chat-messages-${sanitizedReceiver}" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></div>
         <div style="display: flex; align-items: center; margin-top: 10px;">
             <textarea id="chat-input-${sanitizedReceiver}" placeholder="Type a message..." style="flex: 1; height: 50px; margin-right: 10px;"></textarea>
@@ -275,6 +288,13 @@ function openChat(receiver) {
 
     
     document.body.append(chatWindow);
+
+     // Add event listener to the close button
+     const closeButton = document.querySelector(`#close-chat-${sanitizedReceiver}`);
+     closeButton.addEventListener("click", () => {
+         chatWindow.remove();
+         console.log(`Chat window with ${receiver} closed.`);
+     });
 
 
     let chat = document.getElementById(`chat-messages-${sanitizedReceiver}`)
