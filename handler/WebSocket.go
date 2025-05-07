@@ -44,6 +44,15 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for ex, cl := range clients {
+		if cl == username {
+			clientsMutex.Lock()
+			delete(clients, ex)
+			clientsMutex.Unlock()
+			break
+		}
+	}
+
 	// Safely add the client to the map
 	clientsMutex.Lock()
 	clients[conn] = username

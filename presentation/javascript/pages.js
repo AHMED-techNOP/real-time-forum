@@ -203,8 +203,8 @@ export const Homepage = (data) => {
         const message = JSON.parse(event.data);
         console.log(message);
         displayMessage(message.sender, message.content, message.Time, message.sender === username ? message.receiver : message.sender)
-    };
-};
+    }
+}
 
 async function getChats(sender, receiver) {
     try {
@@ -319,28 +319,28 @@ function displayMessage(sender, content, time, receiver) {
         //     return;
         // }
 
-        const msg = document.createElement("div");
-        const span = document.createElement("span");
+        const msg = document.createElement("div")
+        const span = document.createElement("span")
 
-        msg.style.padding = "10px";
-        msg.style.margin = "8px 0";
-        msg.style.backgroundColor = "#f1f1f1";
-        msg.style.borderRadius = "6px";
-        msg.style.fontFamily = "Arial, sans-serif";
-        msg.style.fontSize = "14px";
-        msg.style.position = "relative";
+        msg.style.padding = "10px"
+        msg.style.margin = "8px 0"
+        msg.style.backgroundColor = "#f1f1f1"
+        msg.style.borderRadius = "6px"
+        msg.style.fontFamily = "Arial, sans-serif"
+        msg.style.fontSize = "14px"
+        msg.style.position = "relative"
 
-        span.style.color = "#888";
-        span.style.fontSize = "12px";
-        span.style.right = "10px";
-        span.style.position = "absolute";
-        span.style.bottom = "6px";
+        span.style.color = "#888"
+        span.style.fontSize = "12px"
+        span.style.right = "10px"
+        span.style.position = "absolute"
+        span.style.bottom = "6px"
 
 
-        msg.textContent = `${sender}: ${content}`;
+        msg.textContent = `${sender}: ${content}`
         span.textContent = `${time}`
         msg.append(span)
-        chatMessages.append(msg);
+        chatMessages.append(msg)
     }
 }
 
