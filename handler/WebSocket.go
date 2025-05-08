@@ -3,8 +3,10 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	db "real-time-forum/Database/cration"
 	"sync"
+	"time"
+
+	db "real-time-forum/Database/cration"
 
 	"github.com/gorilla/websocket"
 )
@@ -15,14 +17,17 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-var clients = make(map[*websocket.Conn]string) // Map of WebSocket connections to usernames
-var clientsMutex sync.RWMutex                  // Mutex to synchronize access to the clients map
-var broadcast = make(chan Message)             // Channel for broadcasting messages
+var (
+	clients      = make(map[*websocket.Conn]string) // Map of WebSocket connections to usernames
+	clientsMutex sync.RWMutex                       // Mutex to synchronize access to the clients map
+	broadcast    = make(chan Message)               // Channel for broadcasting messages
+)
 
 type Message struct {
 	Sender   string `json:"sender"`
 	Receiver string `json:"receiver"`
 	Content  string `json:"content"`
+	Time     string
 }
 
 func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
@@ -66,11 +71,21 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	BroadcastOnlineUsers()
 
 	for {
+
 		var msg Message
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			fmt.Println("WebSocket read error:", err)
 			break
+		}
+
+		time := time.Now().Format("2006-01-02 15:04:05")
+		msg.Time = time
+
+		err = db.InsertMessages(msg.Sender, msg.Receiver, msg.Content, msg.Time)
+		if err != nil {
+			fmt.Println("insert massages error:", err)
+			return
 		}
 
 		broadcast <- msg

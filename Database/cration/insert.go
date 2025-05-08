@@ -125,8 +125,8 @@ func UpdateTocken(tocken string) error {
 }
 
 
-func InsertMessages(sender string, receiver string, content string) error {
-	time := time.Now().Format("2006-01-02 15:04:05")
+func InsertMessages(sender string, receiver string, content string, time string) error {
+	// time := time.Now().Format("2006-01-02 15:04:05")
 
 	info, err := DB.Prepare("INSERT INTO messages (sender ,receiver ,text ,time) VALUES (?,?,?,?)")
 	if err != nil {

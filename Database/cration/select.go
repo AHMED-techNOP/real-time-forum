@@ -252,11 +252,11 @@ func Liklength(sl []utils.Reaction, userid int) (int, int, string) {
 	return like, dislike, reactin
 }
 
-func SelecChats(sender string, receiver string, str int, end int) ([]utils.Msg, error) {
+func SelecChats(sender string, receiver string, num int) ([]utils.Msg, error) {
 	var msgs []utils.Msg
 
-	quire := "SELECT sender, receiver, text, time FROM messages WHERE sender = ? AND receiver = ? AND id > ? AND id <= ? ORDER BY id DESC"
-	rows, err := DB.Query(quire, sender, receiver, end, str)
+	quire := "SELECT sender, receiver, text, time FROM messages WHERE (sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?) ORDER BY id DESC LIMIT 10 OFFSET ?"
+	rows, err := DB.Query(quire, sender, receiver, receiver, sender, num)
 	if err != nil {
 		return nil, err
 	}

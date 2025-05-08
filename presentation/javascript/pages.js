@@ -166,6 +166,7 @@ export const Homepage = (data) => {
         } else {
             // Handle other message types (e.g., chat messages)
             const message = data;
+            
             displayMessage(message.sender, message.content, message.Time, message.sender === username ? message.receiver : message.sender)
         }
     };
@@ -198,29 +199,35 @@ export function updateUserList() {
         contact.addEventListener("click", async () => {
             console.log(`Clicked on user: ${user.username}`);
 
+            // openchat(receiver)
+            openChat(user.username);
+
 
            const chatData = await getChats(username, user.username)
-           // openchat(receiver)
-            openChat(user.username);
            
            console.log(chatData);
+
            if (chatData) {
             chatData.forEach(el => {
-                displayMessage(el.Sender, el.Text, el.Time, el.Sender === username ? el.Receiver : el.Render)
+                displayMessage(el.Sender, el.Text, el.Time, el.Sender === username ? el.Receiver : el.Sender)
             })
            }
+
+            
         })
+
+
 
         contactList.append(contact);
     });
 }
 
 
-async function getChats(sender, receiver) {
+async function getChats(sender, receiver, num = 0) {
     try {
         const response = await fetch("/getChats", {
             method: 'POST',
-            body: JSON.stringify({ sender: sender, receiver: receiver }),
+            body: JSON.stringify({ sender: sender, receiver: receiver, num: num }),
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -297,9 +304,9 @@ function openChat(receiver) {
      });
 
 
-    let chat = document.getElementById(`chat-messages-${sanitizedReceiver}`)
-    chat.style.display = "flex"
-    chat.style.flexDirection = "column-reverse"
+    // let chat = document.getElementById(`chat-messages-${sanitizedReceiver}`)
+    // chat.style.display = "flex"
+    // chat.style.flexDirection = "column-reverse"
 
     console.log("Chat window appended to the DOM.");
 
@@ -326,43 +333,58 @@ function openChat(receiver) {
         }
     });
 }
-
 function displayMessage(sender, content, time, receiver) {
     // const username = document.querySelector("title").getAttribute("class"); // Get the current user's username
     const sanitizedReceiver = receiver.replace(/\s+/g, "-"); // Sanitize receiver username
     const chatMessages = document.querySelector(`#chat-messages-${sanitizedReceiver}`);
 
     if (chatMessages) {
-        // Avoid appending the message twice for the sender
-        // if (message.sender === username && message.receiver === username) {
-        //     console.log("Skipping duplicate message for the sender.");
-        //     return;
-        // }
+        const msg = document.createElement("div");
+        const span = document.createElement("span");
 
-        const msg = document.createElement("div")
-        const span = document.createElement("span")
+        msg.style.padding = "10px";
+        msg.style.margin = "8px 0";
+        msg.style.borderRadius = "6px";
+        msg.style.fontFamily = "Arial, sans-serif";
+        msg.style.fontSize = "14px";
+        msg.style.position = "relative";
+        msg.style.maxWidth = "70%";  // Set a max width to prevent messages from getting too wide.
 
-        msg.style.padding = "10px"
-        msg.style.margin = "8px 0"
-        msg.style.backgroundColor = "#f1f1f1"
-        msg.style.borderRadius = "6px"
-        msg.style.fontFamily = "Arial, sans-serif"
-        msg.style.fontSize = "14px"
-        msg.style.position = "relative"
+        // Styling for the timestamp
+        span.style.color = "#888";
+        span.style.fontSize = "12px";
+        span.style.position = "absolute";
+        span.style.bottom = "6px";
+        span.style.right = "10px"; // Position the timestamp
 
-        span.style.color = "#888"
-        span.style.fontSize = "12px"
-        span.style.right = "10px"
-        span.style.position = "absolute"
-        span.style.bottom = "6px"
+        // Set the message content
+        msg.textContent = `${sender}: ${content}`;
+        span.textContent = `${time}`;
 
+        // Check if the message is from the current user (sender)
+        if (sender === username) {
+            // Style for sender's message
+            msg.style.backgroundColor = "#2a91ffd0";  // Green background for sender
+            msg.style.color = "#fff";  // White text for sender
+            msg.style.alignSelf = "flex-end";  // Align sender's message to the right
 
-        msg.textContent = `${sender}: ${content}`
-        span.textContent = `${time}`
-        msg.append(span)
-        chatMessages.append(msg)
+            msg.append(span);
+            chatMessages.append(msg);
+        } else {
+            // Style for receiver's message
+            msg.style.backgroundColor = "#f1f1f1";  // Light gray background for receiver
+            msg.style.color = "#000";  // Black text for receiver
+            msg.style.alignSelf = "flex-start";  // Align receiver's message to the left
+
+            msg.append(span);
+            chatMessages.append(msg);
+        }
+
+        // Ensure chat container scrolls to the bottom to show the latest message
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 }
+
 
 export const MoreData = (data) => {
     let main = document.querySelector(".main-content")
