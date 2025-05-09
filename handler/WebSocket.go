@@ -44,22 +44,21 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	// 	fmt.Println("close hhhhhhhhhhhhhhh")
 	// }()
 
-	defer func() {
-		fmt.Println("1", clients)
-		// Safely remove the client from the map when the connection is closed
-		clientsMutex.Lock()
-		delete(clients, conn)
-		clientsMutex.Unlock()
+	// defer func() {
+	// 	fmt.Println("1", clients)
+	// 	// Safely remove the client from the map when the connection is closed
+	// 	clientsMutex.Lock()
+	// 	delete(clients, conn)
+	// 	clientsMutex.Unlock()
 
-		fmt.Println("2", clients)
+	// 	fmt.Println("2", clients)
 
+	// 	// Broadcast the updated list of online users
+	// 	BroadcastOnlineUsers()
+	// 	conn.Close()
 
-		// Broadcast the updated list of online users
-		BroadcastOnlineUsers()
-		conn.Close()
-
-		fmt.Println("logout hhh")
-	}()
+	// 	fmt.Println("logout hhh")
+	// }()
 
 	username := r.URL.Query().Get("username")
 	if username == "" {
@@ -95,6 +94,21 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			fmt.Println("WebSocket read error:", err)
+
+			fmt.Println("1", clients)
+			// Safely remove the client from the map when the connection is closed
+			clientsMutex.Lock()
+			delete(clients, conn)
+			clientsMutex.Unlock()
+
+			fmt.Println("2", clients)
+
+			// Broadcast the updated list of online users
+			BroadcastOnlineUsers()
+			conn.Close()
+
+			fmt.Println("logout hhh")
+
 			break
 		}
 
@@ -134,8 +148,6 @@ func HandleMessages() {
 	}
 }
 
-
-
 func BroadcastOnlineUsers() {
 	clientsMutex.RLock()
 	defer clientsMutex.RUnlock()
@@ -173,7 +185,7 @@ func BroadcastOnlineUsers() {
 		"type":  "online-users",
 		"users": users,
 	}
-	// fmt.Println("==> online users :", message)
+	fmt.Println("==> online users :", message)
 
 	for client := range clients {
 		err := client.WriteJSON(message)

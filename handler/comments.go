@@ -67,28 +67,28 @@ func Sendcomment(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&comment)
 		if err != nil {
 			fmt.Println("err jsn")
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(`{"error": "` + err.Error() + `", "status":false}`))
 			return
 		}
 		postid, err := strconv.Atoi(comment.PostID)
 		if err != nil {
 			fmt.Println("err postid")
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(`{"error": "` + err.Error() + `", "status":false}`))
 			return
 		}
 		err = db.SelectPostid(postid)
 		if err != nil {
 			fmt.Println("err postid")
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(`{"error": "` + err.Error() + `", "status":false}`))
 			return
 		}
 		err = db.InsertComment(postid, id, comment.Content)
 		if err != nil {
 			fmt.Println("err insert", err)
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(`{"error": "` + err.Error() + `", "status":false}`))
 			return
 		}

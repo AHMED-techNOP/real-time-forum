@@ -15,9 +15,6 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 	// Safely remove the WebSocket connection from the clients map
 	clientsMutex.Lock()
-	
-
-
 
 	for conn, username := range clients {
 		fmt.Println("usernaem:", username, "usernameFromToken:", usernameFromToken)
@@ -31,7 +28,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 	clientsMutex.Unlock()
 
-	//  BroadcastOnlineUsers()
+	BroadcastOnlineUsers()
 
 	// Respond with a success message
 	w.WriteHeader(http.StatusOK)

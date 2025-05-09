@@ -183,8 +183,9 @@ func SelectComments(postid int, userid int) ([]utils.CommentPost, error) {
 }
 
 func SelectPostid(postid int) error {
-	query := "SELECT id FROM postes WHERE id = $1"
-	_, err := DB.Exec(query, postid)
+	id := 0
+	query := "SELECT id FROM postes WHERE id = ?"
+	err := DB.QueryRow(query, postid).Scan(&id)
 	if err != nil {
 		return err
 	}
