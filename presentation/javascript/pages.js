@@ -13,7 +13,7 @@ export const Homepage = (data) => {
     let name = username
     document.body.innerHTML = `
     <header class="header">
-        <div class="logo">FORUM</div>
+        <div class="logo" >FORUM</div>
         <button id="logout">logout</button>
     </header>
     `

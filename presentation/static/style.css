@@ -27,7 +27,7 @@ body {
 
 .logo {
     font-size: 1.75rem;
-    color: #10b981;
+    color: #006eff;
     font-weight: 1000;
     letter-spacing: -0.5px;
 }
@@ -94,7 +94,7 @@ body {
 
 .category-list button:hover {
     background: #f3f4f6;
-    color: #10b981;
+    color: #0080ff;
     transform: translateY(-1px);
 }
 
@@ -127,7 +127,7 @@ body {
 }
 
 .create-post button {
-    background: #10b981;
+    background: #0080ff;
     color: white;
     padding: 0.75rem 1.75rem;
     border: none;
@@ -140,7 +140,7 @@ body {
 }
 
 .create-post button:hover {
-    background: #059669;
+    background: #0080ff;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(16, 185, 129, 0.15);
 }
@@ -172,7 +172,7 @@ body {
 .online-indicator {
     width: 8px;
     height: 8px;
-    background: #10b981;
+    background: #0f9a00;
     border-radius: 50%;
     display: inline-block;
     box-shadow: 0 0 0 2px white;
@@ -266,7 +266,7 @@ h3 {
 
 .form-control:focus {
     outline: none;
-    border-color: #10b981;
+    border-color: #0080ff;
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
@@ -302,8 +302,8 @@ h3 {
 }
 
 .category-checkbox input:checked {
-    background-color: #10b981;
-    border-color: #10b981;
+    background-color: #0080ff;
+    border-color: #0080ff;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
@@ -312,7 +312,7 @@ h3 {
 .submit-btn {
     width: 100%;
     padding: 0.75rem;
-    background-color: #10b981;
+    background-color: #0080ff;
     color: white;
     border: none;
     border-radius: 8px;
@@ -321,7 +321,7 @@ h3 {
 }
 
 .submit-btn:hover {
-    background-color: #059669;
+    background-color: #0080ff;
 }
 
 /*-----------------------------------------------------------------*/
@@ -336,7 +336,7 @@ h3 {
 }
 
 .info-side {
-    background: #4ade80;
+    background: #0080ff;
     color: white;
     padding: 40px;
     width: 40%;
@@ -419,7 +419,7 @@ h3 {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #4ade80;
+    border-color: #0080ff;
 }
 
 select {
@@ -450,7 +450,7 @@ select {
     padding: 12px;
     background: white;
     color: black;
-    border: 1px solid #4ade80;
+    border: 1px solid #0080ff;
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
@@ -459,7 +459,7 @@ select {
 }
 
 #creat-btn:hover {
-    background: #2fdf5b;
+    background: #0080ff;
 }
 
 .have {
@@ -475,7 +475,7 @@ select {
     width: 100%;
     padding: 12px;
     background: transparent;
-    border: 1px solid #4ade80;
+    border: 1px solid #0080ff;
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s;
@@ -490,7 +490,7 @@ select {
 }
 
 #log:hover {
-    background: #4ade80;
+    background: #0080ff;
 }
 
 #log:hover a {
@@ -583,7 +583,7 @@ select {
 }
 
 .info-side {
-    background: #4ade80;
+    background: #0080ff;
     color: white;
     padding: 40px;
     width: 40%;
@@ -639,7 +639,7 @@ select {
 
 .form-group input:focus {
     outline: none;
-    border-color: #4ade80;
+    border-color: #0080ff;
 }
 
 /* Error message styling */
@@ -654,7 +654,7 @@ select {
 #login-btn {
     width: 100%;
     padding: 12px;
-    border: 1px solid #4ade80;
+    border: 1px solid #0080ff;
     background: white;
     color: rgb(34, 33, 33);
     /* border: none; */
@@ -665,7 +665,7 @@ select {
 }
 
 #login-btn:hover {
-    background: #22c55e;
+    background: #0080ff;
 }
 
 /* Register link styling */
@@ -677,7 +677,7 @@ select {
 }
 
 #resgesterlogin{
-    color: #4ade80;
+    color: #0080ff;
     background: none;
     border: none;
     cursor: pointer;
@@ -687,7 +687,7 @@ select {
 }
 
 #resgesterlogin:hover {
-    color: #22c55e;
+    color: #0080ff;
     text-decoration: underline;
 }
 
@@ -893,7 +893,7 @@ label {
 }
 
 [data-status="on"] {
-    background: #5ea775;
+    background: #0080ff;
 }
 
 [data-status="of"] {
