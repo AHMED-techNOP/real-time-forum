@@ -1,4 +1,4 @@
-import { Dateformat } from "./utils.js"
+import { Dateformat, debounce } from "./utils.js"
 import { Listener } from "./service.js"
 import { Checkstuts, username } from "./check.js";
 import { showError } from "./errore.js";
@@ -150,10 +150,11 @@ export const Homepage = (data) => {
 
     // Initialize WebSocket
     // const username = document.querySelector("title").getAttribute("class");
-    socket = new WebSocket(`ws://localhost:8080/ws?username=${username}`);
+    socket = new WebSocket(`/ws?username=${username}`)
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        console.log(data);
 
         // Check if the message is about online users
         if (data.type === "online-users") {
@@ -167,9 +168,9 @@ export const Homepage = (data) => {
             // Handle other message types (e.g., chat messages)
             const message = data;
             
-            displayMessage(message.sender, message.content, message.Time, message.sender === username ? message.receiver : message.sender)
+            displayMessage(message.sender, message.content, message.Time, message.sender === username ? message.receiver : message.sender, 1)
         }
-    };
+    }
 }
 
 
@@ -202,18 +203,13 @@ export function updateUserList() {
             // openchat(receiver)
             openChat(user.username);
 
-
-           const chatData = await getChats(username, user.username)
+           const chatData = await getChats(username, user.username, 0)
            
-           console.log(chatData);
-
            if (chatData) {
             chatData.forEach(el => {
                 displayMessage(el.Sender, el.Text, el.Time, el.Sender === username ? el.Receiver : el.Sender)
             })
            }
-
-            
         })
 
 
@@ -223,11 +219,11 @@ export function updateUserList() {
 }
 
 
-async function getChats(sender, receiver, num = 0) {
+async function getChats(sender, receiver, num = 1) {
     try {
         const response = await fetch("/getChats", {
             method: 'POST',
-            body: JSON.stringify({ sender: sender, receiver: receiver, num: num }),
+            body: JSON.stringify({ sender: sender, receiver: receiver, num: num}),
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -240,16 +236,15 @@ async function getChats(sender, receiver, num = 0) {
         const data = await response.json();
         return data;
     } catch (error) {
-        console.log('Error:', error);
+        console.error('Error:', error);
     }
 }
 
 
+
+
 function openChat(receiver) {
     console.log(`Opening chat with: ${receiver}`);
-
-    // Get the current user's username from the title element
-    // const username = document.querySelector("title").getAttribute("class");
 
     // Sanitize the receiver's username for use in the id
     const sanitizedReceiver = receiver.replace(/\s+/g, "-"); // Replace spaces with hyphens
@@ -304,9 +299,20 @@ function openChat(receiver) {
      });
 
 
-    // let chat = document.getElementById(`chat-messages-${sanitizedReceiver}`)
-    // chat.style.display = "flex"
-    // chat.style.flexDirection = "column-reverse"
+    let chat = document.getElementById(`chat-messages-${sanitizedReceiver}`)
+    chat.style.display = "flex"
+    chat.style.flexDirection = "column-reverse"
+
+    chat.addEventListener("scrollend", debounce(async () => {
+
+        const chatData = await getChats(username, receiver)
+
+        if (chatData) {
+            chatData.forEach(el => {
+                displayMessage(el.Sender, el.Text, el.Time, el.Sender === username ? el.Receiver : el.Sender)
+            })
+           }
+    }, 500))
 
     console.log("Chat window appended to the DOM.");
 
@@ -327,13 +333,13 @@ function openChat(receiver) {
         const message = input.value;
         if (message.trim()) {
             // Use the username variable to send the message
-            socket.send(JSON.stringify({ sender: username, receiver: receiver, content: message }));
+            socket.send(JSON.stringify({ sender: username, receiver: receiver, content: message }))
             // displayMessage({ sender: username, content: message }, receiver);
-            input.value = "";
+            input.value = ""
         }
-    });
+    })
 }
-function displayMessage(sender, content, time, receiver) {
+function displayMessage(sender, content, time, receiver, i = 0) {
     // const username = document.querySelector("title").getAttribute("class"); // Get the current user's username
     const sanitizedReceiver = receiver.replace(/\s+/g, "-"); // Sanitize receiver username
     const chatMessages = document.querySelector(`#chat-messages-${sanitizedReceiver}`);
@@ -358,8 +364,8 @@ function displayMessage(sender, content, time, receiver) {
         span.style.right = "10px"; // Position the timestamp
 
         // Set the message content
-        msg.textContent = `${sender}: ${content}`;
-        span.textContent = `${time}`;
+        msg.textContent = `${sender}: ${content}`
+        // span.textContent = `${time}`;
 
         // Check if the message is from the current user (sender)
         if (sender === username) {
@@ -368,8 +374,8 @@ function displayMessage(sender, content, time, receiver) {
             msg.style.color = "#fff";  // White text for sender
             msg.style.alignSelf = "flex-end";  // Align sender's message to the right
 
-            msg.append(span);
-            chatMessages.append(msg);
+            msg.append(span)
+            i === 0 ? chatMessages.append(msg) : chatMessages.prepend(msg) 
         } else {
             // Style for receiver's message
             msg.style.backgroundColor = "#f1f1f1";  // Light gray background for receiver
@@ -377,11 +383,11 @@ function displayMessage(sender, content, time, receiver) {
             msg.style.alignSelf = "flex-start";  // Align receiver's message to the left
 
             msg.append(span);
-            chatMessages.append(msg);
+            i === 0 ? chatMessages.append(msg) : chatMessages.prepend(msg) 
         }
 
         // Ensure chat container scrolls to the bottom to show the latest message
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        // chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 }
 

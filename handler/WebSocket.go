@@ -30,21 +30,35 @@ type Message struct {
 	Time     string
 }
 
+var conn *websocket.Conn
+
 func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+	var err error
+	conn, err = upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println("WebSocket upgrade error:", err)
 		return
 	}
+
+	// defer func() {
+	// 	fmt.Println("close hhhhhhhhhhhhhhh")
+	// }()
+
 	defer func() {
+		fmt.Println("1", clients)
 		// Safely remove the client from the map when the connection is closed
 		clientsMutex.Lock()
 		delete(clients, conn)
 		clientsMutex.Unlock()
 
+		fmt.Println("2", clients)
+
+
 		// Broadcast the updated list of online users
 		BroadcastOnlineUsers()
 		conn.Close()
+
+		fmt.Println("logout hhh")
 	}()
 
 	username := r.URL.Query().Get("username")
@@ -53,22 +67,27 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("username: ", username)
+
 	// Safely add the client to the map
 	clientsMutex.Lock()
 	for existingConn, existingUsername := range clients {
 		if existingUsername == username {
 			// Close the previous connection for the same username
 			fmt.Println("Closing previous connection for username:", username)
-			existingConn.Close()
 			delete(clients, existingConn)
+			existingConn.Close()
 			break
 		}
 	}
+
 	clients[conn] = username
 	clientsMutex.Unlock()
 
 	// Broadcast the updated list of online users
 	BroadcastOnlineUsers()
+
+	// Read messages !!!!!!!!!
 
 	for {
 
@@ -104,10 +123,7 @@ func HandleMessages() {
 				err := client.WriteJSON(msg)
 				if err != nil {
 					fmt.Println("WebSocket write error:", err)
-
 					client.Close()
-
-					// Safely remove the client from the map
 					clientsMutex.Lock()
 					delete(clients, client)
 					clientsMutex.Unlock()
@@ -117,6 +133,8 @@ func HandleMessages() {
 		clientsMutex.RUnlock()
 	}
 }
+
+
 
 func BroadcastOnlineUsers() {
 	clientsMutex.RLock()
@@ -128,30 +146,35 @@ func BroadcastOnlineUsers() {
 		fmt.Println("Error fetching all users:", err)
 		return
 	}
-	fmt.Println("==> all users :", allUsers)
+	// fmt.Println("==> all users :", allUsers)
 
 	// Build the list of users with their online status
-	users := []map[string]interface{}{}
+	users := []map[string]any{}
 	for _, user := range allUsers {
 		online := false
 		for _, onlineUser := range clients {
 			if onlineUser == user {
+
+				fmt.Println(onlineUser)
+
 				online = true
 				break
 			}
 		}
-		users = append(users, map[string]interface{}{
+
+		users = append(users, map[string]any{
 			"username": user,
 			"online":   online,
 		})
 	}
 
 	// Broadcast the list of users with their online status
-	message := map[string]interface{}{
+	message := map[string]any{
 		"type":  "online-users",
 		"users": users,
 	}
-	fmt.Println("==> online users :", message)
+	// fmt.Println("==> online users :", message)
+
 	for client := range clients {
 		err := client.WriteJSON(message)
 		if err != nil {

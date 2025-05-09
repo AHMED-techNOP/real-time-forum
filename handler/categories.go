@@ -12,7 +12,6 @@ import (
 
 var (
 	sr    = 0
-	count = 0
 )
 
 func Categore(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +37,6 @@ func Categore(w http.ResponseWriter, r *http.Request) {
 
 	lastdata := r.FormValue("lastdata")
 	if lastdata == "true" {
-		fmt.Println("lllllllllll")
 		sr, err = db.Getlastid(categories[0])
 		if err != nil {
 			w.WriteHeader(http.StatusOK)

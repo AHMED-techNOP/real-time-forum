@@ -48,6 +48,18 @@ func HaveToken(tocken string) bool {
 	return token == 1
 }
 
+func GetUsernameByToken(tocken string) string {
+	var username string
+	quire := "SELECT nikname FROM users WHERE sessionToken = ?"
+	err := DB.QueryRow(quire, tocken).Scan(&username)
+	if err != nil {
+		// fmt.Println(err)
+		return ""
+	}
+	return username
+}
+
+
 func GetId(input string, tocken string) int {
 	var id int
 	quire := "SELECT id FROM users WHERE " + input + " = ?"
@@ -96,7 +108,6 @@ func GetPostes(str int, end int, userid int) ([]utils.Postes, error) {
 	return postes, nil
 }
 
-var count int
 
 func GetCategories(category string, start int, userid int) ([]utils.Postes, int, error) {
 	end := 0
@@ -110,7 +121,6 @@ func GetCategories(category string, start int, userid int) ([]utils.Postes, int,
 
 	for rows.Next() {
 
-		count++
 		var id int
 		err := rows.Scan(&id)
 		if err != nil {

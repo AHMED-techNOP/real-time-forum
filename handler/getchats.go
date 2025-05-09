@@ -14,6 +14,8 @@ type chats struct {
 	Num      int `json:"num"`
 }
 
+var chatCount = 0
+
 func Getchats(w http.ResponseWriter, r *http.Request) {
 	var chat chats
 
@@ -23,27 +25,20 @@ func Getchats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Cstr, err = db.GetlastidChat(chat.Sender, chat.Receiver)
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusOK)
-	// 		w.Write([]byte(`{"error": "400", "status":false, "finish": true ,"tocken":false}`))
-	// 		return
-	// 	}
-	// fmt.Println("id:", Cstr)
+	if chat.Num == 0 {
+		chatCount = 0
+	}
 
-	// if Cstr == 0 {
-	// 	w.WriteHeader(http.StatusOK)
-	// 	w.Write([]byte(`{"error": "400", "status":false, "finish": true ,"tocken":false}`))
-	// 	return
-	// }
-
-	chats, err := db.SelecChats(chat.Sender, chat.Receiver, chat.Num)
+	chats, err := db.SelecChats(chat.Sender, chat.Receiver, chatCount)
 	if err != nil {
 		fmt.Println("error : ", err)
 		return
 	}
 
-	fmt.Println(chats, len(chats))
+	// fmt.Println(chats, len(chats), "chatcount : ", chatCount)
+	
+	chatCount += 10
+
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(chats)
