@@ -135,7 +135,6 @@ export const Homepage = (data) => {
     contacts.setAttribute("class", "contacts");
     contacts.innerHTML = `
      <div style=" margin-bottom: 1rem;">
-            <span class="material-icons" id="cancel">visibility_off</span>
             <h3>Contacts</h3>
      </div>
     `;
@@ -143,7 +142,12 @@ export const Homepage = (data) => {
     let contactList = document.createElement("div");
     contactList.setAttribute("id", "contact-list");
 
-
+    // Set height to make the contact list scrollable
+    contactList.style.height = `${window.innerHeight / 4}px`;
+    contactList.style.overflowY = "auto"; // Enable vertical scrolling
+    // contactList.style.border = "1px solid #ccc"; // Optional: Add a border for better visibility
+    // contactList.style.padding = "15px"; // Optional: Add padding for better spacing
+    // contactList.style.borderRadius = "15px"; // Optional: Add rounded corners
     contacts.append(contactList);
     container.append(contacts);
     document.body.append(container);
@@ -210,6 +214,7 @@ export function updateUserList() {
         contact.setAttribute("class", "contact");
         contact.setAttribute("id", `contact-${user.username}`);
         contact.textContent = user.username;
+    
 
         // Add green circle for online users
         if (user.online) {
@@ -287,15 +292,16 @@ function openChat(receiver) {
     const chatWindow = document.createElement("div");
     chatWindow.setAttribute("id", `chat-window-${sanitizedReceiver}`);
     chatWindow.setAttribute("class", "chat-window");
+    chatWindow.style.height = `${window.innerHeight / 2}px`;
     chatWindow.innerHTML = `
-       <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3>Chat with ${receiver}</h3>
-            <button id="close-chat-${sanitizedReceiver}" style="background: none; border: none; cursor: pointer; font-size: 16px;">X</button>
+        <div>
+            <h3>Chat with ${receiver.trim()}</h3>
+            <button id="close-chat-${sanitizedReceiver}">X</button>
         </div>
-        <div class="chat-messages" id="chat-messages-${sanitizedReceiver}" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></div>
-        <div style="display: flex; align-items: center; margin-top: 10px;">
-            <textarea id="chat-input-${sanitizedReceiver}" placeholder="Type a message..." style="flex: 1; height: 50px; margin-right: 10px;"></textarea>
-            <button id="send-message-${sanitizedReceiver}" style="background: none; border: none; cursor: pointer;">
+        <div class="chat-messages" id="chat-messages-${sanitizedReceiver}"></div>
+        <div class="chat-input-container">
+            <textarea id="chat-input-${sanitizedReceiver}" placeholder="Type a message..."></textarea>
+            <button id="send-message-${sanitizedReceiver}">
                 <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#000000">
                     <path d="M0 0h24v24H0z" fill="none"/>
                     <path d="M2 21l21-9L2 3v7l15 2-15 2z"/>
@@ -304,42 +310,30 @@ function openChat(receiver) {
         </div>
     `;
 
-    // Apply temporary inline styles for visibility
-    chatWindow.style.border = "1px solid black";
-    chatWindow.style.backgroundColor = "white";
-    chatWindow.style.position = "fixed";
-    chatWindow.style.bottom = "10px";
-    chatWindow.style.right = "10px";
-    chatWindow.style.width = "300px";
-    chatWindow.style.height = "400px";
-    chatWindow.style.zIndex = "1000";
-    chatWindow.style.overflow = "hidden";
+    // Append the chat window to the bottom of the contacts
+    const contacts = document.querySelector(".contacts");
+    contacts.append(chatWindow);
 
-    
-    document.body.append(chatWindow);
+    // Add event listener to the close button
+    const closeButton = document.querySelector(`#close-chat-${sanitizedReceiver}`);
+    closeButton.addEventListener("click", () => {
+        chatWindow.remove();
+        console.log(`Chat window with ${receiver} closed.`);
+    });
 
-     // Add event listener to the close button
-     const closeButton = document.querySelector(`#close-chat-${sanitizedReceiver}`);
-     closeButton.addEventListener("click", () => {
-         chatWindow.remove();
-         console.log(`Chat window with ${receiver} closed.`);
-     });
-
-
-    let chat = document.getElementById(`chat-messages-${sanitizedReceiver}`)
-    chat.style.display = "flex"
-    chat.style.flexDirection = "column-reverse"
+    let chat = document.getElementById(`chat-messages-${sanitizedReceiver}`);
+    chat.style.display = "flex";
+    chat.style.flexDirection = "column-reverse";
 
     chat.addEventListener("scrollend", debounce(async () => {
-
-        const chatData = await getChats(username, receiver)
+        const chatData = await getChats(username, receiver);
 
         if (chatData) {
             chatData.forEach(el => {
-                displayMessage(el.Sender, el.Text, el.Time, el.Sender === username ? el.Receiver : el.Sender)
-            })
-           }
-    }, 500))
+                displayMessage(el.Sender, el.Text, el.Time, el.Sender === username ? el.Receiver : el.Sender);
+            });
+        }
+    }, 500));
 
     console.log("Chat window appended to the DOM.");
 
@@ -360,12 +354,12 @@ function openChat(receiver) {
         const message = input.value;
         if (message.trim()) {
             // Use the username variable to send the message
-            socket.send(JSON.stringify({ sender: username, receiver: receiver, content: message }))
-            // displayMessage({ sender: username, content: message }, receiver);
-            input.value = ""
+            socket.send(JSON.stringify({ sender: username, receiver: receiver, content: message }));
+            input.value = "";
         }
-    })
+    });
 }
+
 function displayMessage(sender, content, time, receiver, i = 0) {
     // const username = document.querySelector("title").getAttribute("class"); // Get the current user's username
     const sanitizedReceiver = receiver.replace(/\s+/g, "-")
