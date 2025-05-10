@@ -997,3 +997,33 @@ label {
     top: 0;
     /* Move it to the desired location */
 }
+
+
+
+.pop {
+    position: fixed;
+    top: 20px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    width: 300px; 
+    padding: 15px;
+    border-radius: 10px;
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    font-family: Arial, sans-serif;
+    z-index: 9999;
+    text-align: center; 
+}
+
+.pop h3 {
+    margin: 0;
+    font-size: 18px;
+    color: white;
+}
+
+.pop p {
+    margin: 0;
+    font-size: 14px;
+}
+

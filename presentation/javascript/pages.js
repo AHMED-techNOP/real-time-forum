@@ -148,40 +148,67 @@ export const Homepage = (data) => {
     container.append(contacts);
     document.body.append(container);
 
-    // Initialize WebSocket
-    // const username = document.querySelector("title").getAttribute("class");
+   
     socket = new WebSocket(`/ws?username=${username}`)
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
+
         console.log(data);
 
-        // Check if the message is about online users
         if (data.type === "online-users") {
-            Users = data.users; // Array of users with their online status
-            console.log("==== users ", Users);
-
-            
+            Users = data.users; 
             updateUserList()
-
         } else {
-            // Handle other message types (e.g., chat messages)
+            
             const message = data;
+
+        if (message.receiver === username) {
+            const div = document.createElement("div")
+            div.className = "pop"
+
+            div.innerHTML = `
+            <h3> ${message.receiver} </h3>
+              <p> you have a new message from ${message.sender} </p>
+            `
+            document.body.append(div)
+
+            setTimeout(()=> {
+                document.querySelector(".pop").remove()
+            }, 3000)
+        }
+
+        if (message.receiver === username) {
+            contactOrder(message.sender)
+        } else if (message.sender === username) {
+            contactOrder(message.receiver)
+        }
+
             
             displayMessage(message.sender, message.content, message.Time, message.sender === username ? message.receiver : message.sender, 1)
         }
     }
 }
 
+function contactOrder(recSen) {
+    const contactList = document.getElementById("contact-list")
+    const contactRecSen = document.querySelector(`#contact-${recSen}`)
+    
+
+    contactList.prepend(contactRecSen)
+
+}
+
 
 export function updateUserList() {
     const contactList = document.getElementById("contact-list");
-    contactList.innerHTML = ""; // Clear the existing list
+    contactList.innerHTML = ""; 
         console.log("==== users ", Users);
 
     Users.forEach((user) => {
         let contact = document.createElement("div");
         contact.setAttribute("class", "contact");
+        contact.setAttribute("id", `contact-${user.username}`);
         contact.textContent = user.username;
 
         // Add green circle for online users
@@ -341,8 +368,8 @@ function openChat(receiver) {
 }
 function displayMessage(sender, content, time, receiver, i = 0) {
     // const username = document.querySelector("title").getAttribute("class"); // Get the current user's username
-    const sanitizedReceiver = receiver.replace(/\s+/g, "-"); // Sanitize receiver username
-    const chatMessages = document.querySelector(`#chat-messages-${sanitizedReceiver}`);
+    const sanitizedReceiver = receiver.replace(/\s+/g, "-")
+    const chatMessages = document.querySelector(`#chat-messages-${sanitizedReceiver}`)
 
     if (chatMessages) {
         const msg = document.createElement("div");
@@ -388,6 +415,8 @@ function displayMessage(sender, content, time, receiver, i = 0) {
 
         // Ensure chat container scrolls to the bottom to show the latest message
         // chatMessages.scrollTop = chatMessages.scrollHeight;
+    } else {
+
     }
 }
 

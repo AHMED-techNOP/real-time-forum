@@ -20,8 +20,9 @@ var upgrader = websocket.Upgrader{
 var (
 	clients      = make(map[*websocket.Conn]string) // Map of WebSocket connections to usernames
 	clientsMutex sync.RWMutex                       // Mutex to synchronize access to the clients map
-	broadcast    = make(chan Message)               // Channel for broadcasting messages
-)
+	broadcast    = make(chan Message) 
+	username string             
+) // Channel for broadcasting messages
 
 type Message struct {
 	Sender   string `json:"sender"`
@@ -47,7 +48,7 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		conn.Close()
 	}()
 
-	username := r.URL.Query().Get("username")
+	username = r.URL.Query().Get("username")
 	if username == "" {
 		fmt.Println("No username provided in WebSocket connection")
 		return
@@ -131,7 +132,7 @@ func BroadcastOnlineUsers() {
 	fmt.Println("==> all users :", allUsers)
 
 	// Build the list of users with their online status
-	users := []map[string]interface{}{}
+	users := []map[string]any{}
 	for _, user := range allUsers {
 		online := false
 		for _, onlineUser := range clients {
@@ -140,14 +141,14 @@ func BroadcastOnlineUsers() {
 				break
 			}
 		}
-		users = append(users, map[string]interface{}{
+		users = append(users, map[string]any{
 			"username": user,
 			"online":   online,
 		})
 	}
 
 	// Broadcast the list of users with their online status
-	message := map[string]interface{}{
+	message := map[string]any{
 		"type":  "online-users",
 		"users": users,
 	}

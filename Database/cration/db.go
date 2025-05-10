@@ -23,7 +23,7 @@ func Db() (*sql.DB, error) {
 }
 
 func GetAllUsers() ([]string, error) {
-	rows, err := DB.Query("SELECT nikname FROM users") // Use the correct column name
+	rows, err := DB.Query("SELECT nikname FROM users ORDER BY nikname ASC;") 
 	if err != nil {
 		return nil, err
 	}
