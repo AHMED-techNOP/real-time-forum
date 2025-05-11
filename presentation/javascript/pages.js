@@ -133,8 +133,10 @@ export const Homepage = (data) => {
 
     let contacts = document.createElement("aside");
     contacts.setAttribute("class", "contacts");
+    contacts.style.paddingTop = "0"
     contacts.innerHTML = `
      <div style=" margin-bottom: 1rem;">
+     <span class="material-icons" id="cancel"></span>
             <h3>Contacts</h3>
      </div>
     `;
@@ -142,12 +144,13 @@ export const Homepage = (data) => {
     let contactList = document.createElement("div");
     contactList.setAttribute("id", "contact-list");
 
-    // Set height to make the contact list scrollable
+   
     contactList.style.height = `${window.innerHeight / 4}px`;
-    contactList.style.overflowY = "auto"; // Enable vertical scrolling
-    // contactList.style.border = "1px solid #ccc"; // Optional: Add a border for better visibility
-    // contactList.style.padding = "15px"; // Optional: Add padding for better spacing
-    // contactList.style.borderRadius = "15px"; // Optional: Add rounded corners
+    contactList.style.overflowY = "auto";
+    contactList.style.border = "3px solid rgb(226, 226, 226)";
+    contactList.style.padding = "15px"
+    contactList.style.borderRadius = "20px"
+
     contacts.append(contactList);
     container.append(contacts);
     document.body.append(container);
@@ -207,7 +210,10 @@ function contactOrder(recSen) {
 export function updateUserList() {
     const contactList = document.getElementById("contact-list");
     contactList.innerHTML = ""; 
-        console.log("==== users ", Users);
+        console.log("====>> users ", Users);
+
+        Users.sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()))
+
 
     Users.forEach((user) => {
         let contact = document.createElement("div");
@@ -300,7 +306,7 @@ function openChat(receiver) {
         </div>
         <div class="chat-messages" id="chat-messages-${sanitizedReceiver}"></div>
         <div class="chat-input-container">
-            <textarea id="chat-input-${sanitizedReceiver}" placeholder="Type a message..."></textarea>
+            <input class="chat-input" type="text" id="chat-input-${sanitizedReceiver}" placeholder="Type a message..."></input>
             <button id="send-message-${sanitizedReceiver}">
                 <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="#000000">
                     <path d="M0 0h24v24H0z" fill="none"/>
