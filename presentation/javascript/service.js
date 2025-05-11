@@ -423,7 +423,6 @@ function logoutHandel() {
             console.log('Error:', error);
         });
 
-        updateUserList()
 }
 
 

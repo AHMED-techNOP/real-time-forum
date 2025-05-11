@@ -36,6 +36,7 @@ func main() {
 	router.HandleFunc("/ws", handler.WebSocketHandler) // Add WebSocket route
 
 	go handler.HandleMessages() // Start WebSocket message handler in a goroutine
+	go handler.Typing() 
 
 	fmt.Println("✅ Server running on: http://localhost:8080")
 	err = http.ListenAndServe(":8080", router)

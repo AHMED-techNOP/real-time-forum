@@ -22,6 +22,7 @@ var (
 	clientsMutex sync.RWMutex                       // Mutex to synchronize access to the clients map
 	broadcast    = make(chan Message)
 	username     string
+	typing    = make(chan Message)
 ) // Channel for broadcasting messages
 
 type Message struct {
@@ -91,13 +92,20 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		broadcast <- msg
+		if msg.Content == "is-typing" || msg.Content == "no-typing" {
+			typing <- msg
+		} else {
+			broadcast <- msg
+		}
+		
 	}
 }
 
 func HandleMessages() {
 	for {
 		msg := <-broadcast
+
+
 
 		// Safely iterate over the clients map
 		clientsMutex.RLock()
@@ -203,3 +211,30 @@ func BroadcastOnlineUsers() {
 		}
 	}
 }
+
+
+func Typing() {
+	for {
+		msg := <- typing
+
+		clientsMutex.RLock()
+		for client, username := range clients {
+			// Send the message to both the sender and the receiver
+			if username == msg.Receiver || username == msg.Sender {
+				err := client.WriteJSON(msg)
+				if err != nil {
+					fmt.Println("212121:", err)
+
+					client.Close()
+
+					// Safely remove the client from the map
+					clientsMutex.Lock()
+					delete(clients, client)
+					clientsMutex.Unlock()
+				}
+			}
+		}
+		clientsMutex.RUnlock()
+	}
+}
+

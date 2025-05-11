@@ -60,7 +60,7 @@ body {
 
 .sidebar,
 .contacts {
-    width: 280px;
+    width: 400px;
     background: white;
     border-radius: 16px;
     padding: 1.5rem;
@@ -1182,6 +1182,4 @@ label {
     margin: 0;
     font-size: 14px;
 }
-
-
 

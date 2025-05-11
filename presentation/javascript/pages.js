@@ -178,6 +178,10 @@ export const Homepage = (data) => {
 
             updatesOnline(data.users)
 
+        } else if (data.content === "is-typing") {
+            displayTyping(data)
+        } else if (data.content === "no-typing") {
+            displayTyping(data)
         } else {
             
             const message = data;
@@ -208,6 +212,22 @@ export const Homepage = (data) => {
         }
     }
 }
+
+function displayTyping(data){
+    const sender = data.sender.replace(/\s+/g, "-")
+    const typingMessage = document.querySelector(`#typing-${sender}`)
+
+    if (data.receiver === username) {
+        if (data.content === "is-typing"){
+            typingMessage.textContent = `is typing ...`
+        } else if (data.content === "no-typing") {
+            typingMessage.textContent = ``
+        }
+    }
+
+   
+}
+
 
 function contactOrder(recSen) {
     const contactList = document.getElementById("contact-list")
@@ -248,12 +268,15 @@ export function updateUserList(allUsers) {
 
         allUsers.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
 
-
-    Users.forEach((user) => {
+    Users?.forEach((user) => {
         let contact = document.createElement("div")
+        let typing = document.createElement("div")
         contact.setAttribute("class", "contact")
         contact.setAttribute("id", `contact-${user}`)
         contact.textContent = user
+        
+        typing.setAttribute("id", `typing-${user}`)
+        contact.append(typing)
 
         contact.addEventListener("click", async () => {
             console.log(`Clicked on user: ${user}`)
@@ -274,11 +297,16 @@ export function updateUserList(allUsers) {
 
     allUsers.forEach((u) => {
         
-            if ( !(Users.includes(u)) ) {
+            if ( !(Users?.includes(u)) ) {
+                console.log(55555);
                 let contact = document.createElement("div")
+                let typing = document.createElement("div")
                 contact.setAttribute("class", "contact")
                 contact.setAttribute("id", `contact-${u}`)
                 contact.textContent = u
+
+                typing.setAttribute("id", `typing-${u}`)
+                contact.append(typing)
         
                 contact.addEventListener("click", async () => {
                     console.log(`Clicked on user: ${u}`)
@@ -409,17 +437,34 @@ function openChat(receiver) {
             socket.send(JSON.stringify({ sender: username, receiver: receiver, content: message }));
             input.value = "";
         }
+
     });
+
+    const input = document.querySelector(`#chat-input-${sanitizedReceiver}`)
+    let id 
+
+    input.addEventListener('keydown', ()  => {
+        clearTimeout(id)
+        socket.send(JSON.stringify({ sender: username, receiver: receiver, content: "is-typing"}));
+       id = setTimeout(() => {
+            socket.send(JSON.stringify({ sender: username, receiver: receiver, content: "no-typing"}));
+        },4000)
+    })
+
 }
 
 function displayMessage(sender, content, time, receiver, i = 0) {
-    // const username = document.querySelector("title").getAttribute("class"); // Get the current user's username
+    
     const sanitizedReceiver = receiver.replace(/\s+/g, "-")
     const chatMessages = document.querySelector(`#chat-messages-${sanitizedReceiver}`)
 
     if (chatMessages) {
         const msg = document.createElement("div");
         const span = document.createElement("span");
+        const p = document.createElement("p");
+
+        msg.className = "format-msg"
+
 
         msg.style.padding = "10px";
         msg.style.margin = "8px 0";
@@ -427,42 +472,42 @@ function displayMessage(sender, content, time, receiver, i = 0) {
         msg.style.fontFamily = "Arial, sans-serif";
         msg.style.fontSize = "14px";
         msg.style.position = "relative";
-        msg.style.maxWidth = "70%";  // Set a max width to prevent messages from getting too wide.
+        msg.style.maxWidth = "70%";  
 
-        // Styling for the timestamp
-        span.style.color = "#888";
+        
+
+        
+        // span.style.color = "#888";
         span.style.fontSize = "12px";
-        span.style.position = "absolute";
+        // span.style.position = "absolute";
         span.style.bottom = "6px";
-        span.style.right = "10px"; // Position the timestamp
+        span.style.right = "10px"; 
+        
 
-        // Set the message content
-        msg.textContent = `${sender}: ${content}`
-        // span.textContent = `${time}`;
+       
+        p.textContent = `${sender}: ${content}`
+        span.textContent = `${time}`
 
-        // Check if the message is from the current user (sender)
         if (sender === username) {
-            // Style for sender's message
-            msg.style.backgroundColor = "#2a91ffd0";  // Green background for sender
-            msg.style.color = "#fff";  // White text for sender
-            msg.style.alignSelf = "flex-end";  // Align sender's message to the right
+            
+            msg.style.backgroundColor = "#2a91ffd0";  
+            msg.style.color = "#fff";  
+            msg.style.alignSelf = "flex-end";  
 
-            msg.append(span)
+            msg.append(p, span)
             i === 0 ? chatMessages.append(msg) : chatMessages.prepend(msg) 
         } else {
-            // Style for receiver's message
-            msg.style.backgroundColor = "#f1f1f1";  // Light gray background for receiver
-            msg.style.color = "#000";  // Black text for receiver
-            msg.style.alignSelf = "flex-start";  // Align receiver's message to the left
+           
+            msg.style.backgroundColor = "#f1f1f1";  
+            msg.style.color = "#000";  
+            msg.style.alignSelf = "flex-start"; 
 
-            msg.append(span);
+            msg.append(p, span);
             i === 0 ? chatMessages.append(msg) : chatMessages.prepend(msg) 
         }
 
         // Ensure chat container scrolls to the bottom to show the latest message
         // chatMessages.scrollTop = chatMessages.scrollHeight;
-    } else {
-
     }
 }
 
