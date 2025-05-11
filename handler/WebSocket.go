@@ -22,7 +22,7 @@ var (
 	clientsMutex sync.RWMutex                       // Mutex to synchronize access to the clients map
 	broadcast    = make(chan Message)
 	username     string
-	typing    = make(chan Message)
+	typing       = make(chan Message)
 ) // Channel for broadcasting messages
 
 type Message struct {
@@ -83,29 +83,26 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		time := time.Now().Format("2006-01-02 15:04:05")
-		msg.Time = time
-
-		err = db.InsertMessages(msg.Sender, msg.Receiver, msg.Content, msg.Time)
-		if err != nil {
-			fmt.Println("insert massages error:", err)
-			return
-		}
-
 		if msg.Content == "is-typing" || msg.Content == "no-typing" {
 			typing <- msg
 		} else {
+			time := time.Now().Format("2006-01-02 15:04:05")
+			msg.Time = time
+
+			err = db.InsertMessages(msg.Sender, msg.Receiver, msg.Content, msg.Time)
+			if err != nil {
+				fmt.Println("insert massages error:", err)
+				return
+			}
 			broadcast <- msg
 		}
-		
+
 	}
 }
 
 func HandleMessages() {
 	for {
 		msg := <-broadcast
-
-
 
 		// Safely iterate over the clients map
 		clientsMutex.RLock()
@@ -184,9 +181,7 @@ func BroadcastUsers() {
 	}
 }
 
-
 func BroadcastOnlineUsers() {
-
 	var online []string
 
 	for _, client := range clients {
@@ -197,8 +192,6 @@ func BroadcastOnlineUsers() {
 		"type":  "online-users",
 		"users": online,
 	}
-
-	
 
 	for client := range clients {
 		err := client.WriteJSON(message)
@@ -212,10 +205,9 @@ func BroadcastOnlineUsers() {
 	}
 }
 
-
 func Typing() {
 	for {
-		msg := <- typing
+		msg := <-typing
 
 		clientsMutex.RLock()
 		for client, username := range clients {
@@ -237,4 +229,3 @@ func Typing() {
 		clientsMutex.RUnlock()
 	}
 }
-
