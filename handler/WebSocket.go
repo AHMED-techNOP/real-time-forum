@@ -154,6 +154,7 @@ func BroadcastUsers() {
 			"username": user.User,
 			"sort":     user.UserMsg,
 			"online":   online,
+			"allUsers": allUsers,
 		})
 	}
 

@@ -1,7 +1,7 @@
 import { Dateformat, debounce } from "./utils.js"
 import { Listener } from "./service.js"
-import { Checkstuts, username } from "./check.js";
-import { showError } from "./errore.js";
+import { username } from "./check.js";
+
 
 let socket;
 let Users = []
@@ -169,7 +169,7 @@ export const Homepage = (data) => {
                
                 if (user.username === username) {
                     Users = user.sort
-                    updateUserList()
+                    updateUserList(user.allUsers)
                 }
             })
            
@@ -241,26 +241,25 @@ function updatesOnline(users) {
 
 
 
-export function updateUserList() {
-    const contactList = document.getElementById("contact-list");
-    contactList.innerHTML = ""; 
-        console.log("====>> users ", Users);
+export function updateUserList(allUsers) {
+    const contactList = document.getElementById("contact-list")
+    contactList.innerHTML = ""
+        console.log("====>> users ", Users)
 
-        // Users.sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()))
+        allUsers.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
 
 
     Users.forEach((user) => {
-        let contact = document.createElement("div");
-        contact.setAttribute("class", "contact");
-        contact.setAttribute("id", `contact-${user}`);
-        contact.textContent = user;
-       
+        let contact = document.createElement("div")
+        contact.setAttribute("class", "contact")
+        contact.setAttribute("id", `contact-${user}`)
+        contact.textContent = user
 
         contact.addEventListener("click", async () => {
-            console.log(`Clicked on user: ${user}`);
+            console.log(`Clicked on user: ${user}`)
 
             // openchat(receiver)
-            openChat(user);
+            openChat(user)
 
            const chatData = await getChats(username, user, 0)
            
@@ -270,11 +269,37 @@ export function updateUserList() {
             })
            }
         })
+        contactList.append(contact)
+    })
 
+    allUsers.forEach((u) => {
+        
+            if ( !(Users.includes(u)) ) {
+                let contact = document.createElement("div")
+                contact.setAttribute("class", "contact")
+                contact.setAttribute("id", `contact-${u}`)
+                contact.textContent = u
+        
+                contact.addEventListener("click", async () => {
+                    console.log(`Clicked on user: ${u}`)
+        
+                    // openchat(receiver)
+                    openChat(u)
+        
+                   const chatData = await getChats(username, u, 0)
+                   
+                   if (chatData) {
+                    chatData.forEach(el => {
+                        displayMessage(el.Sender, el.Text, el.Time, el.Sender === username ? el.Receiver : el.Sender)
+                    })
+                   }
+                })
 
+                contactList.append(contact)
+            } 
+        })
+    
 
-        contactList.append(contact);
-    });
 }
 
 
