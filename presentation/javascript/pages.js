@@ -163,9 +163,21 @@ export const Homepage = (data) => {
 
         console.log(data);
 
-        if (data.type === "online-users") {
-            Users = data.users; 
-            updateUserList()
+        if (data.type === "users") {
+
+            data.users.forEach(user => {
+               
+                if (user.username === username) {
+                    Users = user.sort
+                    updateUserList()
+                }
+            })
+           
+           
+        } else if (data.type === "online-users") {
+
+            updatesOnline(data.users)
+
         } else {
             
             const message = data;
@@ -206,24 +218,12 @@ function contactOrder(recSen) {
 
 }
 
+function updatesOnline(users) {
 
-export function updateUserList() {
-    const contactList = document.getElementById("contact-list");
-    contactList.innerHTML = ""; 
-        console.log("====>> users ", Users);
+    users.forEach(user => {
+        const contact = document.getElementById(`contact-${user}`)
 
-        Users.sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()))
-
-
-    Users.forEach((user) => {
-        let contact = document.createElement("div");
-        contact.setAttribute("class", "contact");
-        contact.setAttribute("id", `contact-${user.username}`);
-        contact.textContent = user.username;
-    
-
-        // Add green circle for online users
-        if (user.online) {
+       
             let onlineIndicator = document.createElement("span");
             onlineIndicator.setAttribute("class", "online-indicator");
             onlineIndicator.style.backgroundColor = "green";
@@ -233,15 +233,36 @@ export function updateUserList() {
             onlineIndicator.style.display = "inline-block";
             onlineIndicator.style.marginLeft = "10px";
             contact.append(onlineIndicator);
-        }
+        
+    })
+
+  
+}
+
+
+
+export function updateUserList() {
+    const contactList = document.getElementById("contact-list");
+    contactList.innerHTML = ""; 
+        console.log("====>> users ", Users);
+
+        // Users.sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()))
+
+
+    Users.forEach((user) => {
+        let contact = document.createElement("div");
+        contact.setAttribute("class", "contact");
+        contact.setAttribute("id", `contact-${user}`);
+        contact.textContent = user;
+       
 
         contact.addEventListener("click", async () => {
-            console.log(`Clicked on user: ${user.username}`);
+            console.log(`Clicked on user: ${user}`);
 
             // openchat(receiver)
-            openChat(user.username);
+            openChat(user);
 
-           const chatData = await getChats(username, user.username, 0)
+           const chatData = await getChats(username, user, 0)
            
            if (chatData) {
             chatData.forEach(el => {

@@ -28,7 +28,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 	clientsMutex.Unlock()
 
-	BroadcastOnlineUsers()
+	BroadcastUsers()
 
 	// Respond with a success message
 	w.WriteHeader(http.StatusOK)

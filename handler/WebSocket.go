@@ -20,8 +20,8 @@ var upgrader = websocket.Upgrader{
 var (
 	clients      = make(map[*websocket.Conn]string) // Map of WebSocket connections to usernames
 	clientsMutex sync.RWMutex                       // Mutex to synchronize access to the clients map
-	broadcast    = make(chan Message) 
-	username string             
+	broadcast    = make(chan Message)
+	username     string
 ) // Channel for broadcasting messages
 
 type Message struct {
@@ -44,6 +44,7 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		clientsMutex.Unlock()
 
 		// Broadcast the updated list of online users
+		BroadcastUsers()
 		BroadcastOnlineUsers()
 		conn.Close()
 	}()
@@ -69,6 +70,7 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	clientsMutex.Unlock()
 
 	// Broadcast the updated list of online users
+	BroadcastUsers()
 	BroadcastOnlineUsers()
 
 	for {
@@ -119,7 +121,7 @@ func HandleMessages() {
 	}
 }
 
-func BroadcastOnlineUsers() {
+func BroadcastUsers() {
 	clientsMutex.RLock()
 	defer clientsMutex.RUnlock()
 
@@ -131,28 +133,64 @@ func BroadcastOnlineUsers() {
 	}
 	fmt.Println("==> all users :", allUsers)
 
-	// Build the list of users with their online status
+	sortUsers, err := db.GetLastMessage(allUsers)
+	if err != nil {
+		fmt.Println("Error fetching all users:", err)
+		return
+	}
+
+	fmt.Println("sortUsers =======>>  ", sortUsers)
+
 	users := []map[string]any{}
-	for _, user := range allUsers {
+	for _, user := range sortUsers {
 		online := false
 		for _, onlineUser := range clients {
-			if onlineUser == user {
+			if onlineUser == user.User {
 				online = true
 				break
 			}
 		}
 		users = append(users, map[string]any{
-			"username": user,
+			"username": user.User,
+			"sort":     user.UserMsg,
 			"online":   online,
 		})
 	}
 
-	// Broadcast the list of users with their online status
 	message := map[string]any{
-		"type":  "online-users",
+		"type":  "users",
 		"users": users,
 	}
+
 	fmt.Println("==> online users :", message)
+	for client := range clients {
+		err := client.WriteJSON(message)
+		if err != nil {
+			fmt.Println("WebSocket write error:", err)
+			client.Close()
+			clientsMutex.Lock()
+			delete(clients, client)
+			clientsMutex.Unlock()
+		}
+	}
+}
+
+
+func BroadcastOnlineUsers() {
+
+	var online []string
+
+	for _, client := range clients {
+		online = append(online, client)
+	}
+
+	message := map[string]any{
+		"type":  "online-users",
+		"users": online,
+	}
+
+	
+
 	for client := range clients {
 		err := client.WriteJSON(message)
 		if err != nil {
