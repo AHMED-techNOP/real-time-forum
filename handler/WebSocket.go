@@ -182,6 +182,10 @@ func BroadcastUsers() {
 }
 
 func BroadcastOnlineUsers() {
+
+	clientsMutex.RLock()
+	defer clientsMutex.RUnlock()
+
 	var online []string
 
 	for _, client := range clients {

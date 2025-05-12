@@ -108,7 +108,7 @@ export const Homepage = (data) => {
                     </label>
                 </div>
             </div>
-                <p id="error-message"></p>
+                <p id="error-message-creatpost"></p>
             <button type="submit" class="submit-btn">Submit Post</button>
         </form>
     `
@@ -160,8 +160,6 @@ export const Homepage = (data) => {
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-
-        console.log(data);
 
         if (data.type === "users") {
 
@@ -298,7 +296,6 @@ export function updateUserList(allUsers) {
     allUsers.forEach((u) => {
         
             if ( !(Users?.includes(u)) ) {
-                console.log(55555);
                 let contact = document.createElement("div")
                 let typing = document.createElement("div")
                 contact.setAttribute("class", "contact")
@@ -433,8 +430,8 @@ function openChat(receiver) {
 
         const message = input.value;
         if (message.trim()) {
-            // Use the username variable to send the message
-            socket.send(JSON.stringify({ sender: username, receiver: receiver, content: message }));
+            
+            socket.send(JSON.stringify({ sender: username, receiver: receiver, content: message.trim().replace(/\s+/g, ' ') }));
             input.value = "";
         }
 
@@ -448,12 +445,14 @@ function openChat(receiver) {
         socket.send(JSON.stringify({ sender: username, receiver: receiver, content: "is-typing"}));
        id = setTimeout(() => {
             socket.send(JSON.stringify({ sender: username, receiver: receiver, content: "no-typing"}));
-        },4000)
+        }, 2000)
     })
 
 }
 
 function displayMessage(sender, content, time, receiver, i = 0) {
+
+    console.log(content);
     
     const sanitizedReceiver = receiver.replace(/\s+/g, "-")
     const chatMessages = document.querySelector(`#chat-messages-${sanitizedReceiver}`)
@@ -486,6 +485,7 @@ function displayMessage(sender, content, time, receiver, i = 0) {
 
        
         p.textContent = `${sender}: ${content}`
+
         span.textContent = `${time}`
 
         if (sender === username) {
@@ -505,9 +505,6 @@ function displayMessage(sender, content, time, receiver, i = 0) {
             msg.append(p, span);
             i === 0 ? chatMessages.append(msg) : chatMessages.prepend(msg) 
         }
-
-        // Ensure chat container scrolls to the bottom to show the latest message
-        // chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 }
 
@@ -537,7 +534,7 @@ export const MoreData = (data) => {
                 post_header.append(poster)
                 post_header.append(time)
                 let title = document.createElement("h4")
-                title.textContent = element.Title + "   ====> " + element.ID
+                title.textContent = element.Title
                 let p = document.createElement("p")
                 p.textContent = element.Content
                 let cat = document.createElement("i")

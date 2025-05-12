@@ -1,10 +1,10 @@
-import { Homepage, MoreData, updateUserList } from "./pages.js"
+import { Homepage, MoreData } from "./pages.js"
 import { Checkstuts, validateCategories } from "./check.js"
 import { showError } from "./errore.js"
 import { pagenation, Dateformat, debounce } from "./utils.js"
 import { HomeHandeler } from "./Homehandler.js"
 
-export function Listener(){
+export function Listener() {
     let sendcomment = document.querySelectorAll(".send-button")
     sendcomment.forEach((el) => {
         el.addEventListener("click", send_comment)
@@ -180,6 +180,7 @@ export const handelpost = (event) => {
         creat_btn.style.display = "inline"
         window.addEventListener("scroll", pagenation)
     })
+
     let form = document.forms.creatpost
     form.addEventListener("submit", submitpost)
 
@@ -188,14 +189,14 @@ export const handelpost = (event) => {
 
 
 export const submitpost = (ev) => {/////////////////formulaire dyal create post
-    ev.preventDefault();
+    ev.preventDefault()
     let title = ev.target.title.value
     let post = ev.target.content.value
     if (title === "" || post === "") {
-        showError("Fill in all the fields")
+        showError("Fill in all the fields", "error-message-creatpost")
         return
     }
-    const formData = new FormData(ev.target);
+    const formData = new FormData(ev.target)
     fetch('/pubpost', {
         method: 'POST',
         body: formData
@@ -206,12 +207,11 @@ export const submitpost = (ev) => {/////////////////formulaire dyal create post
                 HomeHandeler()
                 return
             } else {
-                console.log(data.tocken)
                 if (data.tocken == false) {
                     Checkstuts()
                     return
                 } else {
-                    showError(data.error)
+                    showError(data.error, "error-message-creatpost")
                     return
                 }
             }
@@ -219,7 +219,7 @@ export const submitpost = (ev) => {/////////////////formulaire dyal create post
         .catch(error => {
             console.log('Error:', error);
 
-        });
+        })
 }
 
 
