@@ -156,7 +156,7 @@ export const Homepage = (data) => {
     document.body.append(container);
 
    
-    socket = new WebSocket(`/ws?username=${username}`)
+    socket = new WebSocket(`/ws`)
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -214,16 +214,20 @@ export const Homepage = (data) => {
 function displayTyping(data){
     const sender = data.sender.replace(/\s+/g, "-")
     const typingMessage = document.querySelector(`#typing-${sender}`)
+    const chatTyping = document.querySelector(`#chat-typing-${sender}`)
+   
+
 
     if (data.receiver === username) {
         if (data.content === "is-typing"){
             typingMessage.textContent = `is typing ...`
+            chatTyping.textContent = `is typing ...`
         } else if (data.content === "no-typing") {
             typingMessage.textContent = ``
+             chatTyping.textContent = ``
+            
         }
     }
-
-   
 }
 
 
@@ -376,6 +380,7 @@ function openChat(receiver) {
             <button id="close-chat-${sanitizedReceiver}">X</button>
         </div>
         <div class="chat-messages" id="chat-messages-${sanitizedReceiver}"></div>
+        <div id="chat-typing-${sanitizedReceiver}"></div>
         <div class="chat-input-container">
             <input class="chat-input" type="text" id="chat-input-${sanitizedReceiver}" placeholder="Type a message..."></input>
             <button id="send-message-${sanitizedReceiver}">
@@ -445,7 +450,7 @@ function openChat(receiver) {
         socket.send(JSON.stringify({ sender: username, receiver: receiver, content: "is-typing"}));
        id = setTimeout(() => {
             socket.send(JSON.stringify({ sender: username, receiver: receiver, content: "no-typing"}));
-        }, 2000)
+        }, 500)
     })
 
 }

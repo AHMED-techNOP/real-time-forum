@@ -39,28 +39,53 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer func() {
-		// Safely remove the client from the map when the connection is closed
+	
 		clientsMutex.Lock()
 		delete(clients, conn)
 		clientsMutex.Unlock()
 
-		// Broadcast the updated list of online users
+		
 		BroadcastUsers()
 		BroadcastOnlineUsers()
 		conn.Close()
 	}()
 
-	username = r.URL.Query().Get("username")
-	if username == "" {
-		fmt.Println("No username provided in WebSocket connection")
+	// username = r.URL.Query().Get("username")
+	// if username == "" {
+	// 	fmt.Println("No username provided in WebSocket connection")
+	// 	return
+	// }
+
+	// allUsers, err := db.GetAllUsers()
+	// if err != nil {
+	// 	fmt.Println("Error fetching all users:", err)
+	// 	return
+	// }
+
+	// if !contains(allUsers, username) {
+	// 	conn.Close()
+	// 	fmt.Println("this nigga does'nt exsist : ", username)
+	// }
+
+
+	cookie, err := r.Cookie("SessionToken")
+
+	if err != nil || cookie.Value == "" {
+		fmt.Println("Error sessionToken ", err)
 		return
 	}
 
-	// Safely add the client to the map
+	username = db.GetUsernameByToken(cookie.Value)
+
+	if username == "" {
+		fmt.Println("this nigga does'nt exsist : ", username)
+		return
+	}
+
+	
 	clientsMutex.Lock()
 	for existingConn, existingUsername := range clients {
 		if existingUsername == username {
-			// Close the previous connection for the same username
 			fmt.Println("Closing previous connection for username:", username)
 			existingConn.Close()
 			delete(clients, existingConn)
@@ -70,7 +95,7 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	clients[conn] = username
 	clientsMutex.Unlock()
 
-	// Broadcast the updated list of online users
+	
 	BroadcastUsers()
 	BroadcastOnlineUsers()
 
@@ -99,6 +124,17 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 }
+
+// func contains(users []string, username string) bool {
+	
+// 	for _, u := range users {
+// 		if u == username {
+// 			return true
+// 		}
+// 	}
+
+// 	return false
+// }
 
 func HandleMessages() {
 	for {
@@ -136,7 +172,7 @@ func BroadcastUsers() {
 		fmt.Println("Error fetching all users:", err)
 		return
 	}
-	fmt.Println("==> all users :", allUsers)
+	
 
 	sortUsers, err := db.GetLastMessage(allUsers)
 	if err != nil {
@@ -144,7 +180,7 @@ func BroadcastUsers() {
 		return
 	}
 
-	fmt.Println("sortUsers =======>>  ", sortUsers)
+	
 
 	users := []map[string]any{}
 	for _, user := range sortUsers {
@@ -168,7 +204,7 @@ func BroadcastUsers() {
 		"users": users,
 	}
 
-	fmt.Println("==> online users :", message)
+	
 	for client := range clients {
 		err := client.WriteJSON(message)
 		if err != nil {

@@ -53,7 +53,6 @@ func GetUsernameByToken(tocken string) string {
 	quire := "SELECT nikname FROM users WHERE sessionToken = ?"
 	err := DB.QueryRow(quire, tocken).Scan(&username)
 	if err != nil {
-		// fmt.Println(err)
 		return ""
 	}
 	return username
